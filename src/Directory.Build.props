@@ -1,0 +1,30 @@
+<Project>
+  <PropertyGroup>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
+    <Owners>Michael-Jorge Gómez Campos</Owners>
+    <Authors>Michael-Jorge Gómez Campos</Authors>
+    <Copyright>Copyright 2022</Copyright>
+    <Summary>FsCelSheet is an Excel cell generator helper in F#</Summary>
+    <Description>FsCelSheet is an Excel cell generator helper in F#</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>fsharp;excel;cel;sheet;fscelsheet</PackageTags>
+    <PackageReleaseNotes>https://github.com/Micha-kun/FsCelSheet/releases</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/Micha-kun/FsCelSheet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.*" PrivateAssets="All"/>
+  </ItemGroup>
+</Project>
