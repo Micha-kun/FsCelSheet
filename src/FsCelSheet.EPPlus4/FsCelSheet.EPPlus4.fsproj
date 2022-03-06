@@ -1,22 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework> 
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="Cells.fs" />
     <Compile Include="SheetRender.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\FsCelSheet.Core\FsCelSheet.Core.fsproj" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="EPPlus" Version="[4.*,)" />
+    <PackageReference Include="EPPlus" Version="[4.*,5)" />
   </ItemGroup>
-
 </Project>

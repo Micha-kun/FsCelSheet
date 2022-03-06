@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <VersionPrefix>0.0.1</VersionPrefix>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
