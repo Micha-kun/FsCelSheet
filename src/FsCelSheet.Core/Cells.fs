@@ -65,6 +65,7 @@ type ExcelCellDataValue =
   | IntegerValue of int
   | DecimalValue of decimal
   | CurrencyValue of decimal * string
+  | AccountingValue of decimal * string
   | PercentageValue of decimal
   | TextValue of string
   | DateTimeValue of DateTime
@@ -78,6 +79,7 @@ type ExcelCellDataValue =
     | IntegerValue x -> IntegerValue -x
     | DecimalValue x -> DecimalValue -x
     | CurrencyValue (x, s) -> CurrencyValue(-x, s)
+    | AccountingValue (x, s) -> AccountingValue(-x, s)
     | PercentageValue x ->
       let pText = x.ToString("0.00 %")
       TextValue $"/ {pText}"
@@ -99,6 +101,11 @@ type ExcelCellDataValue =
     | DecimalValue x1, DecimalValue x2 -> DecimalValue(x1 - x2)
     | CurrencyValue (x1, s1), CurrencyValue (x2, s2) when s1 = s2 -> CurrencyValue(x1 - x2, s1)
     | CurrencyValue (x1, s1), CurrencyValue (x2, s2) ->
+      let p1Text = x1.ToString($"""#,##0.00 %s{s1}""")
+      let p2Text = x2.ToString($"""#,##0.00 %s{s2}""")
+      TextValue $"{p1Text} / {p2Text}"
+    | AccountingValue (x1, s1), AccountingValue (x2, s2) when s1 = s2 -> AccountingValue(x1 - x2, s1)
+    | AccountingValue (x1, s1), AccountingValue (x2, s2) ->
       let p1Text = x1.ToString($"""#,##0.00 %s{s1}""")
       let p2Text = x2.ToString($"""#,##0.00 %s{s2}""")
       TextValue $"{p1Text} / {p2Text}"
@@ -145,6 +152,10 @@ type ExcelCellDataFormat =
   static member CurrencyFormat c =
     $"""#,##0.00 %s{c}"""
     |> ExcelCellDataFormat.Create
+    
+  static member AccountingFormat c =
+    $"""_-[${c}] * #.##0,00_-;-[${c}] * #.##0,00_-;_-[${c}] * "-"??_-;_-@_-"""
+    |> ExcelCellDataFormat.Create
 
 type ExcelCellData =
   private
@@ -158,6 +169,9 @@ type ExcelCellData =
 
   static member CurrencyCell(x, c) =
     ExcelCellData.Create(CurrencyValue(x, c), ExcelCellDataFormat.CurrencyFormat c)
+    
+  static member AccountingCell(x, c) =
+    ExcelCellData.Create(AccountingValue(x, c), ExcelCellDataFormat.AccountingFormat c)
 
   static member PercentageCell x =
     ExcelCellData.Create(PercentageValue x, ExcelCellDataFormat.PercentageFormat)
@@ -182,6 +196,7 @@ type ExcelCellDataValue with
     | IntegerValue x -> ExcelCellData.IntegerCell x
     | DecimalValue x -> ExcelCellData.DecimalCell x
     | CurrencyValue (x, c) -> ExcelCellData.CurrencyCell(x, c)
+    | AccountingValue (x, c) -> ExcelCellData.AccountingCell(x, c)
     | PercentageValue x -> ExcelCellData.PercentageCell x
     | TextValue x -> ExcelCellData.TextCell x
     | DateTimeValue x -> ExcelCellData.DateTimeCell x

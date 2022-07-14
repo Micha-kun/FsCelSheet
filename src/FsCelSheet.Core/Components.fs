@@ -208,6 +208,15 @@ module ExcelComponentFactory =
     match currencyOpt with
     | Some v -> currencyCell v
     | None -> emptyCell
+    
+  let accounting = ExcelCellData.AccountingCell
+    
+  let accountingCell: _ -> ExcelComponentFactory = accounting >> fromCellData
+    
+  let accountingCellOpt currencyOpt =
+    match currencyOpt with
+    | Some v -> accountingCell v
+    | None -> emptyCell
 
   let dateTime = ExcelCellData.DateTimeCell
 

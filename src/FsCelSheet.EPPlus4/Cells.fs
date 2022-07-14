@@ -15,6 +15,7 @@ module Cells =
     match cellDataValue with
     | IntegerValue x -> cellRange.Value <- x
     | CurrencyValue (x, _) -> cellRange.Value <- x
+    | AccountingValue (x, _) -> cellRange.Value <- x
     | DecimalValue x -> cellRange.Value <- x
     | PercentageValue x -> cellRange.Value <- x
     | TextValue x -> cellRange.Value <- x
