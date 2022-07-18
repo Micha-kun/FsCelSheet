@@ -154,7 +154,7 @@ type ExcelCellDataFormat =
     |> ExcelCellDataFormat.Create
     
   static member AccountingFormat c =
-    $"""_-[${c}] * #.##0,00_-;-[${c}] * #.##0,00_-;_-[${c}] * "-"??_-;_-@_-"""
+    $"""_-[${c}] * #,##0.00_-;-[${c}] * #,##0.00_-;_-[${c}] * "-"??_-;_-@_-"""
     |> ExcelCellDataFormat.Create
 
 type ExcelCellData =
