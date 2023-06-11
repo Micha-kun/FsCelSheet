@@ -22,9 +22,9 @@ type ExcelCellSize =
 module ExcelCellSize =
   let (|ExcelCellSize|) (x: ExcelCellSize) = x.ColSpan, x.RowSpan
 
-  let width (ExcelCellSize (col, _)) = col
+  let width (ExcelCellSize(col, _)) = col
 
-  let height (ExcelCellSize (_, row)) = row
+  let height (ExcelCellSize(_, row)) = row
 
 [<Struct>]
 type ExcelCellPosition =
@@ -43,7 +43,7 @@ type ExcelCellPosition =
 module ExcelCellPosition =
   let (|ExcelCellPosition|) (x: ExcelCellPosition) = x.Row, x.Column
 
-  let move (x, y) (ExcelCellPosition (r, c)) = ExcelCellPosition.Create(x + r, y + c)
+  let move (x, y) (ExcelCellPosition(r, c)) = ExcelCellPosition.Create(x + r, y + c)
 
   let moveRow x p = move (x, 0) p
 
@@ -57,9 +57,9 @@ module ExcelCellPosition =
 
   let prevColumn p = moveColumn -1 p
 
-  let row (ExcelCellPosition (r, _)) = r
+  let row (ExcelCellPosition(r, _)) = r
 
-  let column (ExcelCellPosition (_, c)) = c
+  let column (ExcelCellPosition(_, c)) = c
 
 type ExcelCellDataValue =
   | IntegerValue of int
@@ -72,14 +72,15 @@ type ExcelCellDataValue =
   | DateValue of DateTime
   | TimeValue of DateTime
   | FormulaValue of string
+  | OptionalValue of ExcelCellDataValue option
   static member EmptyValue = TextValue ""
 
   static member (~-)(v: ExcelCellDataValue) =
     match v with
     | IntegerValue x -> IntegerValue -x
     | DecimalValue x -> DecimalValue -x
-    | CurrencyValue (x, s) -> CurrencyValue(-x, s)
-    | AccountingValue (x, s) -> AccountingValue(-x, s)
+    | CurrencyValue(x, s) -> CurrencyValue(-x, s)
+    | AccountingValue(x, s) -> AccountingValue(-x, s)
     | PercentageValue x ->
       let pText = x.ToString("0.00 %")
       TextValue $"/ {pText}"
@@ -94,18 +95,20 @@ type ExcelCellDataValue =
       let pText = x.ToString("hh:mm")
       TextValue $" / {pText}"
     | FormulaValue x -> FormulaValue x
+    | OptionalValue(Some x) -> -x
+    | OptionalValue None -> OptionalValue None
 
   static member (-)(v1: ExcelCellDataValue, v2: ExcelCellDataValue) =
     match v1, v2 with
     | IntegerValue x1, IntegerValue x2 -> IntegerValue(x1 - x2)
     | DecimalValue x1, DecimalValue x2 -> DecimalValue(x1 - x2)
-    | CurrencyValue (x1, s1), CurrencyValue (x2, s2) when s1 = s2 -> CurrencyValue(x1 - x2, s1)
-    | CurrencyValue (x1, s1), CurrencyValue (x2, s2) ->
+    | CurrencyValue(x1, s1), CurrencyValue(x2, s2) when s1 = s2 -> CurrencyValue(x1 - x2, s1)
+    | CurrencyValue(x1, s1), CurrencyValue(x2, s2) ->
       let p1Text = x1.ToString($"""#,##0.00 %s{s1}""")
       let p2Text = x2.ToString($"""#,##0.00 %s{s2}""")
       TextValue $"{p1Text} / {p2Text}"
-    | AccountingValue (x1, s1), AccountingValue (x2, s2) when s1 = s2 -> AccountingValue(x1 - x2, s1)
-    | AccountingValue (x1, s1), AccountingValue (x2, s2) ->
+    | AccountingValue(x1, s1), AccountingValue(x2, s2) when s1 = s2 -> AccountingValue(x1 - x2, s1)
+    | AccountingValue(x1, s1), AccountingValue(x2, s2) ->
       let p1Text = x1.ToString($"""#,##0.00 %s{s1}""")
       let p2Text = x2.ToString($"""#,##0.00 %s{s2}""")
       TextValue $"{p1Text} / {p2Text}"
@@ -132,6 +135,12 @@ type ExcelCellDataValue =
       let p2Text = x2.ToString("hh:mm")
       TextValue $"{p1Text} / {p2Text}"
     | FormulaValue x1, FormulaValue _ -> FormulaValue x1
+    | OptionalValue x1, OptionalValue x2 ->
+      match x1, x2 with
+      | None, None -> OptionalValue(None)
+      | None, Some x2 -> OptionalValue(Some -x2)
+      | Some x1, None -> OptionalValue(Some x1)
+      | Some x1, Some x2 -> OptionalValue(Some(x1 - x2))
     | x, y -> failwithf "Unmatching ExcelCellDataValue: %A - %A" x y
 
 [<Struct>]
@@ -152,7 +161,7 @@ type ExcelCellDataFormat =
   static member CurrencyFormat c =
     $"""#,##0.00 %s{c}"""
     |> ExcelCellDataFormat.Create
-    
+
   static member AccountingFormat c =
     $"""_-[${c}] * #,##0.00_-;-[${c}] * #,##0.00_-;_-[${c}] * "-"??_-;_-@_-"""
     |> ExcelCellDataFormat.Create
@@ -169,7 +178,7 @@ type ExcelCellData =
 
   static member CurrencyCell(x, c) =
     ExcelCellData.Create(CurrencyValue(x, c), ExcelCellDataFormat.CurrencyFormat c)
-    
+
   static member AccountingCell(x, c) =
     ExcelCellData.Create(AccountingValue(x, c), ExcelCellDataFormat.AccountingFormat c)
 
@@ -188,6 +197,7 @@ type ExcelCellData =
     ExcelCellData.Create(TimeValue x, ExcelCellDataFormat.TimeFormat)
 
   static member FormulaCell x = ExcelCellData.Create(FormulaValue x)
+  static member OptionalCell x = ExcelCellData.Create(OptionalValue x)
   member self.WithFormat f = ExcelCellData.Create(self.Value, f)
 
 type ExcelCellDataValue with
@@ -195,14 +205,15 @@ type ExcelCellDataValue with
     match this with
     | IntegerValue x -> ExcelCellData.IntegerCell x
     | DecimalValue x -> ExcelCellData.DecimalCell x
-    | CurrencyValue (x, c) -> ExcelCellData.CurrencyCell(x, c)
-    | AccountingValue (x, c) -> ExcelCellData.AccountingCell(x, c)
+    | CurrencyValue(x, c) -> ExcelCellData.CurrencyCell(x, c)
+    | AccountingValue(x, c) -> ExcelCellData.AccountingCell(x, c)
     | PercentageValue x -> ExcelCellData.PercentageCell x
     | TextValue x -> ExcelCellData.TextCell x
     | DateTimeValue x -> ExcelCellData.DateTimeCell x
     | DateValue x -> ExcelCellData.DateCell x
     | TimeValue x -> ExcelCellData.TimeCell x
     | FormulaValue x -> ExcelCellData.FormulaCell x
+    | OptionalValue x -> ExcelCellData.OptionalCell x
 
 [<AutoOpen>]
 module ExcelCellData =

@@ -11,11 +11,11 @@ module Cells =
     cellRange.Style.Numberformat.Format <- format
     cellRange
 
-  let renderCellDataValue cellDataValue (cellRange: ExcelRange) =
+  let rec renderCellDataValue cellDataValue (cellRange: ExcelRange) =
     match cellDataValue with
     | IntegerValue x -> cellRange.Value <- x
-    | CurrencyValue (x, _) -> cellRange.Value <- x
-    | AccountingValue (x, _) -> cellRange.Value <- x
+    | CurrencyValue(x, _) -> cellRange.Value <- x
+    | AccountingValue(x, _) -> cellRange.Value <- x
     | DecimalValue x -> cellRange.Value <- x
     | PercentageValue x -> cellRange.Value <- x
     | TextValue x -> cellRange.Value <- x
@@ -23,13 +23,19 @@ module Cells =
     | DateValue x -> cellRange.Value <- x
     | TimeValue x -> cellRange.Value <- x
     | FormulaValue x -> cellRange.Formula <- x
+    | OptionalValue x ->
+      match x with
+      | Some v ->
+        renderCellDataValue v (cellRange: ExcelRange)
+        |> ignore
+      | None -> cellRange.Value <- ""
 
     cellRange
 
   let renderCellData cellData (cellRange: ExcelRange) =
     match cellData with
     | Simple x -> renderCellDataValue x cellRange
-    | Formatted (x, f) -> renderCellDataValue x cellRange |> setCellFormat f
+    | Formatted(x, f) -> renderCellDataValue x cellRange |> setCellFormat f
 
   let private renderBold (cellRange: ExcelRange) property =
     cellRange.Style.Font.Bold <- property
@@ -106,7 +112,7 @@ module Cells =
     List.foldBack renderCellStyleProperty (style |> ExcelCellStyle.optimize) cellRange
 
   let renderCell (worksheet: ExcelWorksheet) (cell: ExcelCell) =
-    let ExcelCellSize (colSpan, rowSpan), ExcelCellPosition (row, column) =
+    let ExcelCellSize(colSpan, rowSpan), ExcelCellPosition(row, column) =
       cell.Size, cell.Position
 
     let cellRange =
