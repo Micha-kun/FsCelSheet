@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <VersionPrefix>0.0.4</VersionPrefix>
+    <VersionPrefix>0.0.5</VersionPrefix>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
     <Owners>Michael-Jorge Gómez Campos</Owners>
