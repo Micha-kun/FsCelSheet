@@ -8,7 +8,7 @@
     <Compile Include="Components.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="FSharp.Core" VersionOverride="8.0.200" />
     <PackageReference Include="FSharpx.Extras" />
   </ItemGroup>
 </Project>
