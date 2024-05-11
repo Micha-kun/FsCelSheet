@@ -11,6 +11,6 @@
     <ProjectReference Include="..\FsCelSheet.Core\FsCelSheet.Core.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EPPlus" Version="[4.*,5)" />
+    <PackageReference Include="EPPlus" />
   </ItemGroup>
 </Project>
